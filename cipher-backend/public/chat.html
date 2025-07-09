@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cipher Chat</title>
+  <style>
+    :root {
+      --glass-bg: rgba(30, 30, 30, 0.35);
+      --glass-border: rgba(255, 255, 255, 0.2);
+      --accent: #00aaff;
+      --accent-light: #8fd8ff;
+      --offline-color: #666;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body, html {
+      height: 100%;
+      background: url('karsten-winegeart-MD6wA5Nqa-k-unsplash.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      backdrop-filter: blur(10px);
+      background: var(--glass-bg);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 16px 24px;
+      font-size: 20px;
+      font-weight: bold;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+
+    #dmBtn {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: white;
+      cursor: pointer;
+    }
+
+    #dmBtn:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .app-container {
+      display: flex;
+      flex: 1;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+
+    .sidebar.rooms {
+      width: 220px;
+      background: var(--glass-bg);
+      border-right: 1px solid var(--glass-border);
+      display: flex;
+      flex-direction: column;
+      padding: 12px 8px;
+      overflow-y: auto;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .sidebar.rooms h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-left: 12px;
+      color: var(--accent-light);
+    }
+
+    .room-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .room-list li {
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      margin-bottom: 6px;
+      transition: background-color 0.2s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .room-list li:hover {
+      background: rgba(0, 136, 255, 0.15);
+    }
+
+    .room-list li.active {
+      background: rgba(0, 136, 255, 0.35);
+      font-weight: bold;
+      color: var(--accent-light);
+      box-shadow: 0 0 8px var(--accent-light);
+    }
+
+    .room-unread {
+      background: var(--accent);
+      color: black;
+      font-weight: 700;
+      font-size: 12px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      min-width: 20px;
+      text-align: center;
+    }
+
+    .chat-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: transparent;
+      padding: 16px 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .chat-header {
+      font-weight: bold;
+      font-size: 22px;
+      margin-bottom: 12px;
+      color: var(--accent-light);
+      flex-shrink: 0;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .chat-header .topic {
+      font-weight: normal;
+      font-size: 14px;
+      color: #aaa;
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+      margin-bottom: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bubble {
+      max-width: 70%;
+      padding: 12px 18px;
+      border-radius: 16px;
+      backdrop-filter: blur(8px);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      position: relative;
+      white-space: pre-wrap;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      animation: popIn 0.25s ease, typingFade 0.25s ease;
+    }
+
+    .bubble.user {
+      align-self: flex-end;
+      background: rgba(0, 136, 255, 0.25);
+      border-color: rgba(0, 136, 255, 0.4);
+    }
+
+    .bubble.system {
+      align-self: center;
+      font-style: italic;
+      color: #ccc;
+      border: none;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .name-tag {
+      font-weight: bold;
+      font-size: 13px;
+      color: #ace;
+      text-shadow: 0 0 2px rgba(0,0,0,0.5);
+      user-select: text;
+    }
+
+    .bubble.user .name-tag {
+      color: #8fd8ff;
+    }
+
+    .bubble-message {
+      white-space: pre-wrap;
+      color: #fff;
+    }
+
+    @keyframes popIn {
+      0% {
+        transform: scale(0.95);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    @keyframes typingFade {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 12px;
+      padding: 16px 0;
+      backdrop-filter: blur(10px);
+      background: var(--glass-bg);
+      border-top: 1px solid var(--glass-border);
+      flex-shrink: 0;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .chat-input input::placeholder {
+      color: #ccc;
+    }
+
+    .chat-input button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      background: var(--accent);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(0, 170, 255, 0.4);
+      font-size: 16px;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+
+    .chat-input button:hover {
+      background: #0095dd;
+    }
+
+    .sidebar.members {
+      width: 220px;
+      background: var(--glass-bg);
+      border-left: 1px solid var(--glass-border);
+      padding: 12px 8px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      user-select: none;
+      flex-shrink: 0;
+    }
+
+    .sidebar.members h2 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      padding-left: 12px;
+      color: var(--accent-light);
+    }
+
+    .member-list {
+      list-style: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .member-list li {
+      padding: 10px 16px;
+      border-radius: 12px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: default;
+      user-select: text;
+      color: #eee;
+      font-size: 14px;
+      position: relative;
+      transition: background-color 0.15s ease;
+    }
+
+    .member-list li.online {
+      color: var(--accent-light);
+      font-weight: 600;
+    }
+
+    .member-list li.offline {
+      color: var(--offline-color);
+      font-style: italic;
+    }
+
+    .member-status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--offline-color);
+      flex-shrink: 0;
+    }
+
+    .member-list li.online .member-status-dot {
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+
+    .member-room-tag {
+      font-size: 11px;
+      color: #999;
+      font-style: italic;
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      user-select: none;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar.rooms,
+      .sidebar.members {
+        display: none;
+      }
+
+      .app-container {
+        height: auto;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Cipher Chat
+    <button id="dmBtn">💬 DM</button>
+  </header>
+
+  <div class="app-container">
+    <!-- Room List Sidebar -->
+    <aside class="sidebar rooms">
+      <h2>Rooms</h2>
+      <ul class="room-list" id="roomList">
+        <li class="active">
+          <span>General</span>
+          <span class="room-unread" id="unread-general">1</span>
+        </li>
+        <li>
+          <span>Chat</span>
+          <span class="room-unread" id="unread-chat">0</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Chat View -->
+    <main class="chat-main">
+      <div class="chat-header" id="chatHeader">
+        <span>#General</span>
+        <span class="topic">Casual discussion and updates</span>
+      </div>
+      <div class="messages" id="messages">
+        <div class="bubble system">Welcome to the Cipher chatroom!</div>
+        <div class="bubble">
+          <div class="name-tag">admin</div>
+          <div class="bubble-message">Hello everyone 👋</div>
+        </div>
+        <div class="bubble user">
+          <div class="name-tag">Mac</div>
+          <div class="bubble-message">Hey! Just testing things out.</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <input type="text" id="msgInput" placeholder="Type a message…" autocomplete="off" />
+        <button id="sendBtn">Send</button>
+      </div>
+    </main>
+
+    <!-- Member List Sidebar -->
+    <aside class="sidebar members">
+      <h2>Members</h2>
+      <ul class="member-list" id="memberList">
+        <li class="online">
+          <div class="member-status-dot"></div>
+          <span>admin</span>
+          <span class="member-room-tag">#General</span>
+        </li>
+        <li class="offline">
+          <div class="member-status-dot"></div>
+          <span>Mac</span>
+          <span class="member-room-tag">#Chat</span>
+        </li>
+      </ul>
+    </aside>
+  </div>
+
+  <script>
+      // DOM Elements
+      const roomListEl = document.getElementById('roomList');
+      const memberListEl = document.getElementById('memberList');
+      const messagesEl = document.getElementById('messages');
+      const chatHeaderEl = document.getElementById('chatHeader');
+      const msgInputEl = document.getElementById('msgInput');
+      const sendBtn = document.getElementById('sendBtn');
+
+      // State
+      let currentRoom = 'general'; // default room id (lowercase for simplicity)
+      let rooms = {
+        general: {
+          id: 'general',
+          name: 'General',
+          topic: 'Casual discussion and updates',
+          messages: [
+            { user: 'system', message: 'Welcome to the Cipher chatroom!' },
+            { user: 'admin', message: 'Hello everyone 👋' },
+            { user: 'Mac', message: 'Hey! Just testing things out.' },
+          ],
+          unread: 0
+        },
+        chat: {
+          id: 'chat',
+          name: 'Chat',
+          topic: 'Random chit-chat',
+          messages: [],
+          unread: 0
+        }
+      };
+
+      // WebSocket Setup
+      let ws;
+
+      function connectWebSocket() {
+        ws = new WebSocket('ws://' + location.host);
+        ws.addEventListener('open', () => {
+          console.log('WebSocket connected');
+          ws.send(JSON.stringify({ type: 'auth' })); // simple auth message
+          joinRoom(currentRoom);
+        });
+
+        ws.addEventListener('message', (event) => {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'chat:room' && data.room) {
+            const { room, user, message } = data;
+
+            if (!rooms[room]) {
+              rooms[room] = {
+                id: room,
+                name: room.charAt(0).toUpperCase() + room.slice(1),
+                topic: '',
+                messages: [],
+                unread: 0
+              };
+              addRoomToSidebar(room);
+            }
+
+            rooms[room].messages.push({ user, message });
+
+            if (room === currentRoom) {
+              appendMessage(user, message);
+              scrollMessagesToBottom();
+            } else {
+              rooms[room].unread++;
+              updateUnreadBadge(room);
+            }
+          }
+        });
+
+        ws.addEventListener('close', () => {
+          console.log('WebSocket disconnected. Attempting to reconnect in 5s...');
+          setTimeout(connectWebSocket, 5000);
+        });
+      }
+
+      // Append message bubble
+      function appendMessage(user, message) {
+        const bubble = document.createElement('div');
+        bubble.classList.add('bubble');
+        if (user === 'system') bubble.classList.add('system');
+        else if (user === currentUser()) bubble.classList.add('user');
+
+        if (user !== 'system') {
+          const nameTag = document.createElement('div');
+          nameTag.classList.add('name-tag');
+          nameTag.textContent = user;
+          bubble.appendChild(nameTag);
+        }
+
+        const msgDiv = document.createElement('div');
+        msgDiv.classList.add('bubble-message');
+        msgDiv.textContent = message;
+        bubble.appendChild(msgDiv);
+
+        messagesEl.appendChild(bubble);
+      }
+
+      // Scroll messages container to bottom
+      function scrollMessagesToBottom() {
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+      }
+
+      // Load messages for room into messages container
+      function loadMessages(roomId) {
+        messagesEl.innerHTML = '';
+        const room = rooms[roomId];
+        if (!room) return;
+        room.messages.forEach(({ user, message }) => {
+          appendMessage(user, message);
+        });
+        scrollMessagesToBottom();
+      }
+
+      // Update unread badge
+      function updateUnreadBadge(roomId) {
+        const badge = document.getElementById(`unread-${roomId}`);
+        if (!badge) return;
+        const count = rooms[roomId].unread;
+        badge.textContent = count > 0 ? count : '';
+      }
+
+      // Join room: send WebSocket message, update UI
+      function joinRoom(roomId) {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({ type: 'join:room', room: roomId }));
+        }
+      }
+
+      // Add room item to sidebar dynamically
+      function addRoomToSidebar(roomId) {
+        const room = rooms[roomId];
+        if (!room) return;
+
+        const li = document.createElement('li');
+        li.textContent = room.name;
+        li.id = `room-${roomId}`;
+        li.classList.add('room-list-item');
+        if (roomId === currentRoom) li.classList.add('active');
+
+        // Add unread badge span
+        const badge = document.createElement('span');
+        badge.classList.add('room-unread');
+        badge.id = `unread-${roomId}`;
+        badge.textContent = room.unread > 0 ? room.unread : '';
+        li.appendChild(badge);
+
+        li.addEventListener('click', () => {
+          if (currentRoom === roomId) return; // already selected
+
+          // Clear active from old room
+          const oldActive = document.querySelector('.room-list li.active');
+          if (oldActive) oldActive.classList.remove('active');
+
+          li.classList.add('active');
+          currentRoom = roomId;
+          rooms[currentRoom].unread = 0;
+          updateUnreadBadge(currentRoom);
+
+          // Update header
+          chatHeaderEl.innerHTML = `<span>#${room.name}</span><span class="topic">${room.topic}</span>`;
+
+          // Load messages
+          loadMessages(currentRoom);
+
+          // Join room on backend
+          joinRoom(currentRoom);
+        });
+
+        roomListEl.appendChild(li);
+      }
+
+      // Get current username (placeholder)
+      function currentUser() {
+        // TODO: replace with actual logged-in username from backend/session
+        return 'Mac';
+      }
+
+      // Send message handler
+      function sendMessage() {
+        const msg = msgInputEl.value.trim();
+        if (!msg) return;
+
+        // Send via websocket
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'chat:room',
+            room: currentRoom,
+            message: msg
+          }));
+        }
+
+        // Optimistically add message locally
+        rooms[currentRoom].messages.push({ user: currentUser(), message: msg });
+        appendMessage(currentUser(), msg);
+        scrollMessagesToBottom();
+
+        // Clear input
+        msgInputEl.value = '';
+        msgInputEl.focus();
+      }
+
+      // Event Listeners
+      sendBtn.addEventListener('click', sendMessage);
+      msgInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Initialize room list UI and messages
+      function init() {
+        // Clear static rooms (hardcoded li) because we recreate them here
+        roomListEl.innerHTML = '';
+        for (const roomId in rooms) {
+          addRoomToSidebar(roomId);
+        }
+
+        // Load initial messages for default room
+        chatHeaderEl.innerHTML = `<span>#${rooms[currentRoom].name}</span><span class="topic">${rooms[currentRoom].topic}</span>`;
+        loadMessages(currentRoom);
+
+        connectWebSocket();
+      }
+
+      init();
+    </script>
+
+</body>
+</html>

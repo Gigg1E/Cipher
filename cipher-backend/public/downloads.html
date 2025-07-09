@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Download Cipher</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: url('karsten-winegeart-MD6wA5Nqa-k-unsplash.jpg') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(12px);
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1;
+    }
+
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      padding: 14px 32px;
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      font-weight: 500;
+      font-size: clamp(14px, 1.2vw, 20px);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    nav button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .container {
+      position: relative;
+      z-index: 5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 140px 5% 60px; /* Push down for topbar */
+      min-height: 100vh;
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      padding: clamp(40px, 6vw, 80px);
+      width: clamp(420px, 60vw, 800px);
+      color: #fff;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 40px;
+      animation: popIn 1.5s ease both;
+    }
+
+    @keyframes popIn {
+      from { transform: translateY(40px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    h1 {
+      font-size: clamp(32px, 4vw, 48px);
+      text-align: center;
+    }
+
+    p#version-text {
+      text-align: center;
+      font-size: 18px;
+      color: #ccc;
+    }
+
+    .downloads {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .download-btn {
+      display: inline-block;
+      padding: 14px 24px;
+      border: 2px solid #fff;
+      color: #fff;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .download-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .download-btn.disabled {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    @media (max-width: 768px) {
+      .glass-box {
+        width: 90%;
+      }
+
+      nav {
+        gap: 20px;
+      }
+
+      nav button {
+        padding: 12px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+
+  <div id="topbar">
+    <nav>
+      <button>DOWNLOAD</button>
+      <button onclick="location.href='index.html'">SERVER</button>
+      <button onclick="location.href='info.html'">INFO</button>
+    </nav>
+  </div>
+
+  <div class="container">
+    <div class="glass-box">
+      <h1>Download Cipher</h1>
+      <p id="version-text">Checking for latest version...</p>
+      <div class="downloads">
+        <a id="dl-Cipher-Windows-exe" class="download-btn disabled" href="#">Windows</a>
+        <a id="dl-Cipher-Linux-AppImage" class="download-btn disabled" href="#">Linux</a>
+        <a id="dl-Cipher-Mac-dmg" class="download-btn disabled" href="#">Mac</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    async function updateDownloadLinks() {
+      const repo = "Gigg1E/ENDER";  // Replace with your GitHub repo path
+      const apiUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+
+      try {
+        const response = await fetch(apiUrl);
+        if (!response.ok) throw new Error("Failed to fetch release");
+
+        const release = await response.json();
+        const version = release.tag_name;
+        const assets = release.assets;
+
+        document.getElementById("version-text").textContent = `Latest Version: ${version}`;
+
+        assets.forEach(asset => {
+          const safeName = asset.name.replace(/\W/g, "-");
+          const linkId = `dl-${safeName}`;
+          const btn = document.getElementById(linkId);
+
+          if (btn) {
+            btn.href = asset.browser_download_url;
+            btn.textContent = `Download ${asset.name} (${(asset.size / 1_000_000).toFixed(1)} MB)`;
+            btn.classList.remove("disabled");
+          }
+        });
+      } catch (err) {
+        console.error("Error fetching release data:", err);
+        document.getElementById("version-text").textContent = "⚠️ Unable to load release info.";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", updateDownloadLinks);
+  </script>
+</body>
+</html>

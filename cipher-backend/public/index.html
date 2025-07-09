@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cipher Login</title>
+  <style>
+    /* Your existing styles here */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: url('karsten-winegeart-MD6wA5Nqa-k-unsplash.jpg') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: white;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      backdrop-filter: blur(12px);
+      background-color: rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1.5s ease forwards;
+      z-index: 1;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      backdrop-filter: blur(12px);
+      background-color: rgba(0, 0, 0, 0.6);
+      z-index: 100;
+      padding: 20px 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    nav {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    nav button {
+      padding: 14px 32px;
+      background: transparent;
+      border: 2px solid #fff;
+      color: #fff;
+      font-weight: 500;
+      font-size: clamp(14px, 1.2vw, 20px);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    nav button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100%;
+      padding: 140px 5% 80px;
+      gap: 60px;
+      z-index: 5;
+      min-height: 100vh;
+    }
+
+    .glass-box {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      padding: clamp(40px, 6vw, 80px);
+      width: clamp(420px, 45vw, 700px);
+      color: #fff;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: popIn 3s ease both;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      height: auto;
+    }
+
+    @keyframes popIn {
+      from {
+        transform: translateY(40px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .glass-box h1 {
+      font-size: clamp(28px, 3vw, 36px);
+      font-weight: 700;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .logo-placeholder {
+      height: 275px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: auto;
+    }
+
+    .logo-image {
+      max-height: 100%;
+      max-width: 100%;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 18px 22px;
+      background: rgba(0, 0, 0, 0.55);
+      border: none;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 18px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    .input-group input:focus {
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+    }
+
+    .form-buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 10px;
+    }
+
+    .form-buttons button {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .form-buttons button:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.03);
+    }
+
+    .rules h3 {
+      font-size: 20px;
+      margin-bottom: 10px;
+      text-decoration: underline;
+    }
+
+    .rules ul {
+      list-style: none;
+      font-size: 16px;
+      padding-left: 0;
+    }
+
+    .rules ul li::before {
+      content: "• ";
+      color: #ccc;
+    }
+
+    .rules ul li {
+      margin: 8px 0;
+    }
+
+    .owner {
+      text-align: right;
+      font-size: 14px;
+      color: #aaa;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .glass-box {
+        width: 90%;
+      }
+
+      nav {
+        gap: 20px;
+      }
+
+      nav button {
+        padding: 12px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    async function checkSession() {
+      try {
+        const res = await fetch('/api/session', { credentials: 'include' });
+        const data = await res.json();
+        if (data.loggedIn) {
+          if (data.isAdmin) {
+            window.location.href = `admin.html?user=${encodeURIComponent(data.user)}`;
+          } else {
+            window.location.href = `chat.html?user=${encodeURIComponent(data.user)}`;
+          }
+        }
+      } catch {
+        // ignore errors
+      }
+    }
+    checkSession();
+  </script>
+
+  <div class="overlay"></div>
+
+  <div id="topbar">
+    <nav>
+      <button onclick="location.href='Downloads.html'">DOWNLOADS</button>
+      <button>SERVER</button>
+      <button onclick="location.href='info.html'">INFO</button>
+    </nav>
+  </div>
+
+  <div class="container">
+    <!-- Login Box -->
+    <div class="glass-box">
+      <div class="logo-placeholder">
+        <img src="Cipher_logoTran.png" alt="Cipher Logo" class="logo-image" />
+      </div>
+
+      <h1>CIPHER</h1>
+      <div class="input-group">
+        <input type="text" id="username" placeholder="Username">
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password">
+      </div>
+      <div class="form-buttons">
+        <button onclick="login()">Login</button>
+        <button onclick="signup()">Sign Up</button>
+      </div>
+      <div id="message" style="color: lightcoral; font-weight: 700; margin-top: 10px;"></div>
+
+      <script>
+        async function login() {
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value.trim();
+          const messageEl = document.getElementById('message');
+          messageEl.textContent = '';
+
+          if (!username || !password) {
+            messageEl.textContent = 'Please enter username and password';
+            return;
+          }
+
+          try {
+            const res = await fetch('/api/login', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+              messageEl.style.color = 'lightgreen';
+              messageEl.textContent = 'Login successful! Redirecting...';
+              setTimeout(() => {
+                if (data.isAdmin) {
+                  window.location.href = `admin.html?user=${encodeURIComponent(username)}`;
+                } else {
+                  window.location.href = `chat.html?user=${encodeURIComponent(username)}`;
+                }
+              }, 1000);
+            } else {
+              messageEl.style.color = 'lightcoral';
+              messageEl.textContent = data.error || 'Login failed';
+            }
+
+          } catch {
+            messageEl.style.color = 'lightcoral';
+            messageEl.textContent = 'Network error during login';
+          }
+        }
+
+        async function signup() {
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value.trim();
+          const messageEl = document.getElementById('message');
+          messageEl.textContent = '';
+
+          if (!username || !password) {
+            messageEl.textContent = 'Please enter username and password';
+            return;
+          }
+
+          try {
+            const res = await fetch('/api/signup', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+              messageEl.style.color = 'lightgreen';
+              messageEl.textContent = 'Signup request sent. Await admin approval.';
+            } else {
+              messageEl.style.color = 'lightcoral';
+              messageEl.textContent = data.error || 'Signup failed';
+            }
+          } catch {
+            messageEl.style.color = 'lightcoral';
+            messageEl.textContent = 'Network error during signup';
+          }
+        }
+      </script>
+    </div>
+
+    <!-- Server Info Box -->
+    <div class="glass-box">
+      <h1>SERVER NAME</h1>
+      <p>Welcome to our cozy community. Please review the rules before joining!</p>
+      <div class="rules">
+        <h3>RULES</h3>
+        <ul>
+          <li>No bad words</li>
+          <li>No NSFW content</li>
+          <li>Guests are currently disabled</li>
+          <li>Respect admins and their control</li>
+        </ul>
+      </div>
+      <div class="owner">Owner: MqllpW</div>
+    </div>
+  </div>
+</body>
+</html>

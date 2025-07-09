@@ -1,0 +1,11 @@
+{
+  "admin": {
+    "password": "$2b$10$NvIWCslpaB8sSJqfVID1.ukMrrttqMHJ3tOh.PouS7bX3ZFXLQJE2",
+    "approved": true,
+    "banned": false,
+    "isAdmin": true,
+    "ip": "127.0.0.1",
+    "requestedAt": "2025-07-09T16:11:17.227Z",
+    "online": false
+  }
+}

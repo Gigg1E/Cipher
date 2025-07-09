@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cipher Admin Panel</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #121212;
+      color: #fff;
+      padding: 30px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .user-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .user-card {
+      background: #1e1e1e;
+      padding: 14px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 4px solid #444;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-info small {
+      font-size: 0.8rem;
+      color: #ccc;
+      margin-top: 2px;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .user-actions button {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s ease;
+    }
+
+    .approve { background: #28a745; color: #fff; }
+    .ban     { background: #dc3545; color: #fff; }
+    .unapprove { background: #ffc107; color: #000; }
+    .delete  { background: #6c757d; color: #fff; }
+    .unban   { background: #17a2b8; color: #fff; }
+
+    .refresh {
+      padding: 10px 20px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+
+    .refresh:hover { background: #0056b3; }
+    .status-online { color: lightgreen; font-weight: bold; }
+    .status-offline { color: gray; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <h1>Pending Signup Requests</h1>
+    <div id="pendingList" class="user-list"></div>
+  </div>
+
+  <div class="section">
+    <h1>Current Users</h1>
+    <div id="userList" class="user-list"></div>
+  </div>
+
+  <div class="section">
+    <h1>Banned Users</h1>
+    <div id="bannedList" class="user-list"></div>
+  </div>
+
+  <button class="refresh" onclick="loadAll()">🔄 Refresh All</button>
+
+  <script>
+    async function loadAll() {
+      await loadPending();
+      await loadUsers();
+    }
+
+    async function loadPending() {
+      const container = document.getElementById('pendingList');
+      container.innerHTML = 'Loading...';
+
+      const res = await fetch('/api/admin/pending', { credentials: 'include' });
+      const data = await res.json();
+
+      if (!data.pending.length) {
+        container.innerHTML = '<p>No pending users.</p>';
+        return;
+      }
+
+      container.innerHTML = '';
+      data.pending.forEach(user => {
+        const card = buildUserCard(user, [
+          { label: 'Approve', class: 'approve', onClick: () => approveUser(user.username) },
+          { label: 'Ban', class: 'ban', onClick: () => banUser(user.username) }
+        ]);
+        container.appendChild(card);
+      });
+    }
+
+    async function loadUsers() {
+      const userList = document.getElementById('userList');
+      const bannedList = document.getElementById('bannedList');
+      userList.innerHTML = bannedList.innerHTML = 'Loading...';
+
+      const res = await fetch('/api/admin/users', { credentials: 'include' });
+      const { users } = await res.json();
+
+      userList.innerHTML = '';
+      bannedList.innerHTML = '';
+
+      users.forEach(user => {
+        const status = user.online ? '<span class="status-online">Online</span>' : '<span class="status-offline">Offline</span>';
+        const info = {
+          username: user.username,
+          ip: user.ip,
+          status,
+          requestedAt: user.requestedAt
+        };
+
+        if (user.banned) {
+          const card = buildUserCard(info, [
+            { label: 'Unban', class: 'unban', onClick: () => unbanUser(user.username) },
+            { label: 'Approve', class: 'approve', onClick: () => approveUser(user.username) },
+            { label: 'Delete', class: 'delete', onClick: () => deleteUser(user.username) }
+          ]);
+          bannedList.appendChild(card);
+        } else if (user.approved) {
+          const card = buildUserCard(info, [
+            { label: 'Unapprove', class: 'unapprove', onClick: () => unapproveUser(user.username) },
+            { label: 'Ban', class: 'ban', onClick: () => banUser(user.username) },
+            { label: 'Delete', class: 'delete', onClick: () => deleteUser(user.username) }
+          ]);
+          userList.appendChild(card);
+        }
+      });
+    }
+
+    function buildUserCard(user, actions) {
+      const card = document.createElement('div');
+      card.className = 'user-card';
+
+      const info = document.createElement('div');
+      info.className = 'user-info';
+      info.innerHTML = `
+        <strong>${user.username}</strong>
+        <small>IP: ${user.ip}</small>
+        ${user.status ? `<small>Status: ${user.status}</small>` : ''}
+        <small>Requested: ${new Date(user.requestedAt).toLocaleString()}</small>
+      `;
+
+      const actionBtns = document.createElement('div');
+      actionBtns.className = 'user-actions';
+
+      actions.forEach(({ label, class: cls, onClick }) => {
+        const btn = document.createElement('button');
+        btn.className = cls;
+        btn.textContent = label;
+        btn.onclick = onClick;
+        actionBtns.appendChild(btn);
+      });
+
+      card.appendChild(info);
+      card.appendChild(actionBtns);
+      return card;
+    }
+
+    async function approveUser(username) {
+      await updateUser(username, true, false);
+    }
+
+    async function unapproveUser(username) {
+      await updateUser(username, false, false);
+    }
+
+    async function banUser(username) {
+      await updateUser(username, false, true);
+    }
+
+    async function unbanUser(username) {
+      await updateUser(username, true, false);
+    }
+
+    async function updateUser(username, approve, ban) {
+      const res = await fetch('/api/admin/approve', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, approve, ban })
+      });
+      if (!res.ok) return alert('Failed to update user');
+      loadAll();
+    }
+
+    async function deleteUser(username) {
+      const password = prompt(`To delete "${username}", enter your admin password:`);
+      if (!password) return;
+
+      const res = await fetch('/api/admin/delete', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: username, adminPassword: password })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        alert('Failed to delete: ' + (err.error || 'Unknown error'));
+        return;
+      }
+
+      alert(`User "${username}" deleted`);
+      loadAll();
+    }
+
+    loadAll();
+  </script>
+</body>
+</html>
