@@ -1,3 +1,4 @@
+// util/db.js
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
@@ -40,11 +41,11 @@ db.serialize(() => {
   )`);
 
   db.run(`CREATE TABLE IF NOT EXISTS messages (
-    id TEXT PRIMARY KEY,
-    roomId TEXT,
-    username TEXT,
-    message TEXT,
-    timestamp TEXT,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    roomId TEXT NOT NULL,
+    username TEXT NOT NULL,
+    message TEXT NOT NULL,
+    timestamp TEXT NOT NULL,
     FOREIGN KEY(roomId) REFERENCES rooms(id),
     FOREIGN KEY(username) REFERENCES users(username)
   )`);

@@ -20,13 +20,13 @@
       margin-bottom: 40px;
     }
 
-    .user-list {
+    .user-list, .room-list {
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
-    .user-card {
+    .user-card, .room-card {
       background: #1e1e1e;
       padding: 14px;
       border-radius: 8px;
@@ -36,23 +36,23 @@
       border-left: 4px solid #444;
     }
 
-    .user-info {
+    .user-info, .room-info {
       display: flex;
       flex-direction: column;
     }
 
-    .user-info small {
+    .user-info small, .room-info small {
       font-size: 0.8rem;
       color: #ccc;
       margin-top: 2px;
     }
 
-    .user-actions {
+    .user-actions, .room-actions {
       display: flex;
       gap: 10px;
     }
 
-    .user-actions button {
+    .user-actions button, .room-actions button {
       padding: 6px 10px;
       font-size: 0.9rem;
       border: none;
@@ -100,12 +100,24 @@
     <div id="bannedList" class="user-list"></div>
   </div>
 
+  <div class="section">
+    <h1>Manage Rooms</h1>
+    <form id="roomForm">
+      <input type="text" id="roomId" placeholder="Room ID" required>
+      <input type="text" id="roomName" placeholder="Room Name" required>
+      <input type="text" id="roomTopic" placeholder="Room Topic" required>
+      <button type="submit" class="approve">➕ Create Room</button>
+    </form>
+    <div id="roomList" class="room-list" style="margin-top: 20px;"></div>
+  </div>
+
   <button class="refresh" onclick="loadAll()">🔄 Refresh All</button>
 
   <script>
     async function loadAll() {
       await loadPending();
       await loadUsers();
+      await loadRooms();
     }
 
     async function loadPending() {
@@ -168,6 +180,71 @@
       });
     }
 
+    async function loadRooms() {
+      const res = await fetch('/api/rooms');
+      const rooms = await res.json();
+      const list = document.getElementById('roomList');
+      list.innerHTML = '';
+
+      rooms.forEach(room => {
+        const card = document.createElement('div');
+        card.className = 'room-card';
+
+        const info = document.createElement('div');
+        info.className = 'room-info';
+        info.innerHTML = `<strong>#${room.name}</strong><small>ID: ${room.id}</small><small>${room.topic}</small>`;
+
+        const actions = document.createElement('div');
+        actions.className = 'room-actions';
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete';
+        deleteBtn.textContent = '🗑 Delete';
+        deleteBtn.onclick = async () => {
+          if (confirm(`Are you sure you want to delete room "${room.name}"?`)) {
+            const res = await fetch('/api/admin/rooms/delete', {
+              method: 'POST',
+              credentials: 'include',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ id: room.id })
+            });
+            if (!res.ok) {
+              const err = await res.json();
+              return alert('Failed to delete room: ' + (err.error || 'Unknown'));
+            }
+            loadRooms();
+          }
+        };
+
+        actions.appendChild(deleteBtn);
+        card.appendChild(info);
+        card.appendChild(actions);
+        list.appendChild(card);
+      });
+    }
+
+    document.getElementById('roomForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const id = document.getElementById('roomId').value.trim();
+      const name = document.getElementById('roomName').value.trim();
+      const topic = document.getElementById('roomTopic').value.trim();
+      if (!id || !name || !topic) return alert('Please fill out all fields.');
+
+      const res = await fetch('/api/admin/rooms/create', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, name, topic })
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return alert('Failed to create room: ' + (err.error || 'Unknown'));
+      }
+
+      document.getElementById('roomForm').reset();
+      loadRooms();
+    });
+
     function buildUserCard(user, actions) {
       const card = document.createElement('div');
       card.className = 'user-card';
@@ -197,21 +274,10 @@
       return card;
     }
 
-    async function approveUser(username) {
-      await updateUser(username, true, false);
-    }
-
-    async function unapproveUser(username) {
-      await updateUser(username, false, false);
-    }
-
-    async function banUser(username) {
-      await updateUser(username, false, true);
-    }
-
-    async function unbanUser(username) {
-      await updateUser(username, true, false);
-    }
+    async function approveUser(username) { await updateUser(username, true, false); }
+    async function unapproveUser(username) { await updateUser(username, false, false); }
+    async function banUser(username) { await updateUser(username, false, true); }
+    async function unbanUser(username) { await updateUser(username, true, false); }
 
     async function updateUser(username, approve, ban) {
       const res = await fetch('/api/admin/approve', {

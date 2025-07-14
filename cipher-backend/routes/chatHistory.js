@@ -35,7 +35,7 @@ function loadChatHistory(roomId, limit = 20, offset = 0) {
           return reject(err);
         }
 
-        // Optional: format timestamps if needed
+        // Optionally format timestamp
         const formatted = rows.map(row => ({
           ...row,
           time: dayjs(row.timestamp).format('HH:mm')
