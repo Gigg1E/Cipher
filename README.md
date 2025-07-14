@@ -134,9 +134,9 @@ http://localhost:3000/
 (Will have Networking support soon)
 
 ### Login proccess
-| Currently, user accounts must be manually whitelisted by the server admin.
-| Default chat rooms "Chat" are created automatically.
-| The client UI supports messaging, and room switching.
+> Currently, user accounts must be manually whitelisted by the server admin.
+> Default chat rooms "Chat" are created automatically.
+> The client UI supports messaging, and room switching.
 
 1. User signs up with Username and Password (Password only known to them)
 2. Admin (default Username: admin password: admin123) approves them into the server, or bans.
