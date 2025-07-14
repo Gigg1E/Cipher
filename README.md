@@ -41,7 +41,7 @@ Cipher is actively under development. Below is a summary of what is currently im
 ### Backend Server
 
 - **User Authentication:** Session-based login system with whitelist-style signup approval.  
-- **Persistent Storage:** User data and friends list stored in JSON files, with plans to migrate to SQLite.  
+- **Persistent Storage:** User data and friends list stored in SQLite.  
 - **WebSocket Communication:** Real-time messaging support with session authentication.  
 - **Rooms & Members API:** Endpoints for managing chat rooms and member lists.  
 - **Rate Limiting & Security:** Basic protections against abuse (login/signup throttling).  
@@ -52,7 +52,7 @@ Cipher is actively under development. Below is a summary of what is currently im
 - **Chat Interface:** Glassmorphism UI with frosted glass effects, dark themes, and accent colors.  
 - **Friend & Room Lists:** Sidebar displays for members and rooms (default rooms created automatically).  
 - **Direct Messaging:** P2P-enabled DMs with fallback mechanisms.  
-- **User Profiles:** Local profile storage, customizable nicknames, and avatars.
+- **User Profiles:** Local profile storage, customizable nicknames, and avatars (Names only at the moment).
 
 ### Server Web Interface
 
@@ -64,7 +64,6 @@ Cipher is actively under development. Below is a summary of what is currently im
 
 Cipher is designed with extensibility and innovation in mind. Planned future work includes:
 
-- **SQLite Integration:** Replace JSON file storage with SQLite for scalability and reliability.  
 - **Full React Client:** Transition the client UI to React for better state management and modularity.  
 - **Public API:** Expose a comprehensive API for third-party client and tool development.  
 - **Micro-host P2P Server:** Lightweight private group chat hosted by individual users.  
@@ -91,6 +90,7 @@ Cipher is designed with extensibility and innovation in mind. Planned future wor
 
 ## Getting Started
 
+I'll make the syntax of the following better soon...
 ### Prerequisites
 
 - Node.js (v16 or later recommended)  
@@ -104,62 +104,66 @@ Cipher is designed with extensibility and innovation in mind. Planned future wor
    ```bash
    git clone https://github.com/yourusername/cipher.git
    cd cipher/cipher-backend
+   ```
 Install dependencies:
 
-bash
-Copy
-Edit
+```bash
 npm install
-Running the Server
+```
+
+### Running the Server
+
 Start the backend server:
 
-bash
-Copy
-Edit
+```bash
 node server.js
+```
+or 
+```bash
+npm start
+```
 By default, the server listens on port 3000. You can configure ports and other settings in the config files.
 
 Access the client:
 
 Open your browser and navigate to:
 
-arduino
-Copy
-Edit
+```
 http://localhost:3000/
+```
+(Will have Networking support soon)
+
+### Login proccess
 Login and usage:
 
 Currently, user accounts must be manually whitelisted by the server admin.
 
-Default chat rooms General and Chat are created automatically.
+Default chat rooms "Chat" are created automatically.
 
-The client UI supports friend requests, messaging, and room switching.
+The client UI supports messaging, and room switching.
 
-Project Architecture
+### Project Architecture
 Cipher consists of three main components:
-
-Server: Handles authentication, message routing, session management, and persistent data storage.
-
-Server Web Page: Public-facing interface for login, server info, and administrative settings.
-
-Client Web Page: The chat interface loaded by users; handles messaging, friends, and UI interaction.
+- Server: Handles authentication, message routing, session management, and persistent data storage.
+- Server Web Page: Public-facing interface for login, server info, and administrative settings.
+- Client Web Page: The chat interface loaded by users; handles messaging, friends, and UI interaction.
 
 The system is designed to support multiple client types in the future, including native apps and terminal clients.
 
-Contributing
+## Contributing
 Contributions are welcome! To contribute:
 
-Fork the repository
+1. Fork the repository
 
-Create a feature branch (git checkout -b feature/my-feature)
+2. Create a feature branch (git checkout -b feature/my-feature)
 
-Commit your changes (git commit -m 'Add some feature')
+3. Commit your changes (git commit -m 'Add some feature')
 
-Push to the branch (git push origin feature/my-feature)
+4. Push to the branch (git push origin feature/my-feature)
 
-Open a Pull Request describing your changes
+5. Open a Pull Request describing your changes
 
-Please ensure code follows existing style guidelines and includes comments where necessary.
+### Please ensure code follows existing style guidelines and includes comments where necessary.
 
 License
 This project is licensed under the MIT License.
