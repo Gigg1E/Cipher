@@ -90,7 +90,6 @@ Cipher is designed with extensibility and innovation in mind. Planned future wor
 
 ## Getting Started
 
-I'll make the syntax of the following better soon...
 ### Prerequisites
 
 - Node.js (v16 or later recommended)  
@@ -124,6 +123,7 @@ npm start
 ```
 By default, the server listens on port 3000. You can configure ports and other settings in the config files.
 
+
 Access the client:
 
 Open your browser and navigate to:
@@ -134,13 +134,31 @@ http://localhost:3000/
 (Will have Networking support soon)
 
 ### Login proccess
-Login and usage:
+| Currently, user accounts must be manually whitelisted by the server admin.
+| Default chat rooms "Chat" are created automatically.
+| The client UI supports messaging, and room switching.
 
-Currently, user accounts must be manually whitelisted by the server admin.
+1. User signs up with Username and Password (Password only known to them)
+2. Admin (default Username: admin password: admin123) approves them into the server, or bans.
+3. User can now say "HI" to everyone!!!
 
-Default chat rooms "Chat" are created automatically.
+### Admin
+```admin
+Username: admin ; Password: admin123
+```
+Change Username and Password:
+1. Start server
+2. Login as admin
+3. Delete admin
+4. Turn off server
+5. Edit syncAdminUser.js (cipher-backend/syncAdminUser.js)
+6. Change username and password (lines 6 & 7)
+7. Save and run server again
 
-The client UI supports messaging, and room switching.
+Control:
+- Admins can see pending users, un-approve, ban, or delete users.
+- Admins can see users, unapprove (manual timeout), ban, or delete users (including other admins).
+- Admins can create and delete rooms/channels
 
 ### Project Architecture
 Cipher consists of three main components:
