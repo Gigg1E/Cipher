@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Cipher Info</title>
   <style>
     * {
@@ -122,30 +122,41 @@
       color: #ddd;
     }
 
-    .roadmap {
+    .bar-graph {
       display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: space-between;
-    }
-
-    .roadmap-item {
-      flex: 1 1 280px;
+      justify-content: space-evenly;
+      align-items: flex-end;
+      height: 220px;
+      padding: 30px 10px 0;
       background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 20px;
       border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .bar-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 80px;
+    }
+
+    .bar {
+      width: 30px;
+      border-radius: 8px 8px 0 0;
+      background: linear-gradient(180deg, #66bb6a, #388e3c);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      transition: height 0.5s;
+    }
+
+    .bar-label {
+      margin-top: 12px;
       text-align: center;
-    }
-
-    .roadmap-item h3 {
-      margin-bottom: 12px;
-      font-size: 20px;
-      color: #fff;
-    }
-
-    .roadmap-item p {
-      font-size: 15px;
+      font-size: 14px;
+      color: #eee;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
 
     .team-grid {
@@ -174,25 +185,10 @@
       font-size: 14px;
       color: #aaa;
     }
-
-    @media (max-width: 768px) {
-      .glass-box {
-        width: 90%;
-      }
-
-      nav {
-        gap: 20px;
-      }
-
-      nav button {
-        padding: 12px 18px;
-      }
-    }
   </style>
 </head>
 <body>
   <div class="overlay"></div>
-
   <div id="topbar">
     <nav>
       <button onclick="location.href='downloads.html'">DOWNLOADS</button>
@@ -215,94 +211,76 @@
     </div>
 
     <div class="glass-box">
-        <h2>📈 Project Roadmap</h2>
-        <div class="roadmap">
-            <div class="roadmap-item">
-            <h3>✅ Alpha Client</h3>
-            <p>Core web interface with encrypted DMs, server access, and persistent profile management.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>✅ Public API</h3>
-            <p>REST + WebSocket endpoints to enable external bots, custom clients, and tooling.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🚧 Plugin System</h3>
-            <p>Support for server-side and UI-level extensions for community mods.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🚧 P2P Web DMs</h3>
-            <p>Web-based encrypted P2P chat that falls back to server when peer is offline.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🛠️ Visual Themes</h3>
-            <p>Light/dark mode switching and custom theming capabilities for servers and users.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🛠️ Background Listener</h3>
-            <p>Optional client service that listens for DMs or @mentions while minimized or closed.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>💤 Microhost Server (Planned)</h3>
-            <p>One-file P2P server for hosting private, password-protected group chats.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>💤 Voice/Video Chat (Planned)</h3>
-            <p>WebRTC-based voice and video integration for future community releases.</p>
-            </div>
+      <h2>📈 Project Roadmap</h2>
+      <div class="bar-graph">
+        <div class="bar-group">
+          <div class="bar" style="height: 100px;"></div>
+          <div class="bar-label">Client</div>
         </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 100px;"></div>
+          <div class="bar-label">API</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 80px;"></div>
+          <div class="bar-label">Plugins</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 75px;"></div>
+          <div class="bar-label">DMs</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 60px;"></div>
+          <div class="bar-label">Themes</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 45px;"></div>
+          <div class="bar-label">Microhost</div>
+        </div>
+        <div class="bar-group">
+          <div class="bar" style="height: 30px;"></div>
+          <div class="bar-label">Calls</div>
+        </div>
+      </div>
     </div>
 
     <div class="glass-box">
-        <h2>📦 Changelog</h2>
-        <div class="roadmap">
-            <div class="roadmap-item">
-            <h3>[0.2.0] – 2025-07-03</h3>
-            <p><strong>Overview:</strong> Shifted to web-first architecture with open API access and modular plugin support.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🚫 Removed</h3>
-            <p>- Terminal & App clients removed from core.<br>- Terminal P2P logic deprecated.</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>✅ Added</h3>
-            <p>- Public API (REST + WebSocket)<br>- Plugin system<br>- Background Listener<br>- Theme Support<br>- P2P fallback in DMs</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>🟢 Retained</h3>
-            <p>- Client Web UI<br>- Server + Hosted Web Access<br>- Friend Request Queueing<br>- Local Config Support</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>💤 Future</h3>
-            <p>- Microhost Group Server<br>- Voice/Video Chat<br>- Threaded Messaging</p>
-            </div>
-            <div class="roadmap-item">
-            <h3>💡 Philosophy</h3>
-            <p>“We build the platform — you build the experience.”</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="glass-box">
-      <h2>👥 Meet the Team</h2>
+      <h2>Meet the Team</h2>
       <div class="team-grid">
         <div class="team-card">
           <h4>MqllpW</h4>
           <p>Project Creator / Full Stack Dev</p>
         </div>
-        <div class="team-card">
-          <h4>RedPhantom</h4>
-          <p>UI Designer / Aesthetic Visionary</p>
-        </div>
-        <div class="team-card">
-          <h4>NullByte</h4>
-          <p>Security Lead / Encryption Wizard</p>
-        </div>
-        <div class="team-card">
-          <h4>ByteBeard</h4>
-          <p>Terminal UX / Debug Troll</p>
-        </div>
+      </div>
+
+      <div style="
+        margin-top: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        padding: 24px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        text-align: center;
+        color: #ddd;
+        font-size: 16px;
+        line-height: 1.6;
+      ">
+        <h3 style="color: #fff; margin-bottom: 12px;">How You Can Help</h3>
+        <p>
+          Cipher is built by the community, for the community. Whether you're a developer, designer, bug hunter, or just someone with ideas — your contribution is welcome.
+        </p>
+        <p style="margin-top: 12px;">
+          Fork the project, suggest features, report bugs, design new themes, or collaborate on ideas to make Cipher better for everyone.
+        </p>
+        <p style="margin-top: 20px;">
+          <a href="https://github.com/yourusername/cipher" target="_blank" style="
+            color: #8ecfff;
+            font-weight: 500;
+            text-decoration: none;
+          ">View the Cipher Repository on GitHub</a>
+        </p>
       </div>
     </div>
+
   </div>
 </body>
 </html>

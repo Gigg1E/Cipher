@@ -35,9 +35,11 @@ const sessionMiddleware = session({
 
 // --- Middleware ---
 app.use(cors({
-  origin: 'http://localhost:5000',
+  origin: ['http://localhost:8000', 'http://192.168.1.xxx:8000'], // Replace with your LAN IP
   credentials: true,
 }));
+
+
 app.use(express.json());
 app.use(express.static('public'));
 app.use(sessionMiddleware);
@@ -140,7 +142,8 @@ db.serialize(() => {
 });
 
 // --- Start ---
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`🚀 Cipher server running on http://localhost:${PORT}`);
+const PORT = process.env.PORT || 8000;
+const HOST = '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  console.log(`🚀 Cipher server running on http://${HOST}:${PORT}`);
 });
