@@ -133,6 +133,8 @@ http://localhost:3000/
 ```
 (Will have Networking support soon)
 
+---
+
 ### Login proccess
 > Currently, user accounts must be manually whitelisted by the server admin.
 > Default chat rooms "Chat" are created automatically.
