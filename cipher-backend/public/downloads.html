@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Download Cipher</title>
+  <title>Host Your Own Cipher Server</title>
   <style>
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Segoe UI', sans-serif;
+      color: #fff;
     }
 
     html, body {
-      width: 100%;
-      height: 100%;
+      min-height: 100%;
       background: url('MenuBG.jpg') no-repeat center center fixed;
       background-size: cover;
       overflow-x: hidden;
@@ -32,13 +32,12 @@
 
     #topbar {
       position: fixed;
-      top: 0;
-      left: 0;
+      top: 0; left: 0;
       width: 100%;
       backdrop-filter: blur(12px);
       background-color: rgba(0, 0, 0, 0.6);
       z-index: 100;
-      padding: 20px 0;
+      padding: 16px 0;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -46,12 +45,13 @@
 
     nav {
       display: flex;
-      gap: 40px;
+      gap: 32px;
       flex-wrap: wrap;
+      z-index: 101;
     }
 
     nav button {
-      padding: 14px 32px;
+      padding: 12px 28px;
       background: transparent;
       border: 2px solid #fff;
       color: #fff;
@@ -67,59 +67,58 @@
       transform: scale(1.05);
     }
 
+    /* Container for split layout */
     .container {
       position: relative;
       z-index: 5;
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 140px 5% 60px; /* Push down for topbar */
-      min-height: 100vh;
+      max-width: 1200px;
+      margin: 90px auto 40px; /* margin top = topbar height + spacing */
+      gap: 32px;
+      padding: 0 20px;
+      align-items: flex-start;
     }
 
-    .glass-box {
+    /* Left sticky panel for downloads */
+    .left-panel {
+      position: sticky;
+      top: 80px; /* stick just below topbar */
+      flex: 0 0 320px;
       background: rgba(255, 255, 255, 0.07);
       border-radius: 30px;
-      padding: clamp(40px, 6vw, 80px);
-      width: clamp(420px, 60vw, 800px);
-      color: #fff;
+      padding: 32px 28px;
       backdrop-filter: blur(18px);
       box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.2);
       display: flex;
       flex-direction: column;
-      gap: 24px;
-      margin-bottom: 40px;
-      animation: popIn 1.5s ease both;
+      gap: 20px;
+      box-sizing: border-box;
+      max-height: calc(100vh - 100px);
+      overflow-y: auto; /* only scroll if content grows */
     }
 
-    @keyframes popIn {
-      from { transform: translateY(40px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    h1 {
-      font-size: clamp(32px, 4vw, 48px);
+    .left-panel h1 {
+      font-size: clamp(28px, 4vw, 36px);
       text-align: center;
+      margin-bottom: 4px;
     }
 
-    p#version-text {
-      text-align: center;
+    .version-text {
       font-size: 18px;
       color: #ccc;
+      text-align: center;
+      margin-bottom: 12px;
     }
 
     .downloads {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      margin-top: 20px;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 0;
     }
 
     .download-btn {
-      display: inline-block;
       padding: 14px 24px;
       border: 2px solid #fff;
       color: #fff;
@@ -127,6 +126,8 @@
       text-decoration: none;
       transition: all 0.3s ease;
       background: rgba(0, 0, 0, 0.5);
+      font-weight: 600;
+      text-align: center;
     }
 
     .download-btn:hover {
@@ -139,17 +140,76 @@
       pointer-events: none;
     }
 
-    @media (max-width: 768px) {
-      .glass-box {
-        width: 90%;
+    /* Right panel */
+    .right-panel {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 30px;
+      padding: 32px 40px;
+      backdrop-filter: blur(18px);
+      box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      box-sizing: border-box;
+      max-height: none; /* no forced height */
+      overflow-y: visible; /* allow page scroll */
+    }
+
+    .right-panel h2 {
+      font-size: clamp(24px, 3vw, 32px);
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .right-panel p, 
+    .right-panel ul {
+      font-size: clamp(16px, 1.8vw, 18px);
+      line-height: 1.5;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+
+    .right-panel ul {
+      list-style: inside disc;
+    }
+
+    .github-link {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .github-link a {
+      color: #aaa;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .github-link a:hover {
+      color: #eee;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+        margin: 100px 20px 40px;
+        padding: 0;
       }
 
-      nav {
-        gap: 20px;
+      .left-panel {
+        position: relative;
+        top: auto;
+        max-height: none;
+        overflow-y: visible;
+        flex: none;
+        padding: 28px 20px;
+        margin-bottom: 24px;
       }
 
-      nav button {
-        padding: 12px 18px;
+      .right-panel {
+        max-height: none;
+        overflow-y: visible;
+        padding: 28px 20px;
       }
     }
   </style>
@@ -166,50 +226,99 @@
   </div>
 
   <div class="container">
-    <div class="glass-box">
+
+    <aside class="left-panel" aria-label="Download latest Cipher releases">
       <h1>Download Cipher</h1>
-      <p id="version-text">Checking for latest version...</p>
+      <p class="version-text" id="version-text">Checking for latest version...</p>
       <div class="downloads">
-        <a id="dl-Cipher-Windows-exe" class="download-btn disabled" href="#">Windows</a>
-        <a id="dl-Cipher-Linux-AppImage" class="download-btn disabled" href="#">Linux</a>
-        <a id="dl-Cipher-Mac-dmg" class="download-btn disabled" href="#">Mac</a>
+        <a id="dl-zip" class="download-btn disabled" href="#" target="_blank" rel="noopener noreferrer">ZIP Archive</a>
+        <a id="dl-targz" class="download-btn disabled" href="#" target="_blank" rel="noopener noreferrer">TAR.GZ Archive</a>
       </div>
-    </div>
+    </aside>
+
+    <main class="right-panel" aria-label="Hosting information and details">
+      <h2>Host Your Own Cipher Server</h2>
+      <p>
+        Take full control of your communication by hosting your own Cipher chat server. Ideal for communities, teams, or personal use.
+      </p>
+      <h2>Why Host Your Own Server?</h2>
+      <ul>
+        <li>Complete control over data and privacy</li>
+        <li>Customizable features and user management</li>
+        <li>No reliance on public servers or third parties</li>
+        <li>Open-source & transparent platform</li>
+      </ul>
+      <h2>Requirements & Quick Start</h2>
+      <p>
+        To run a Cipher server, you need a basic Linux, Windows, or macOS machine with Node.js installed. Download the latest release on the left and follow the included documentation.
+      </p>
+
+      <div class="github-link">
+        <a href="https://github.com/Gigg1E/Cipher" target="_blank" rel="noopener noreferrer">
+          View on GitHub
+        </a>
+      </div>
+    </main>
+
   </div>
 
   <script>
     async function updateDownloadLinks() {
-      const repo = "Gigg1E/Cipher";  // Replace with your GitHub repo path
+      const repo = "Gigg1E/Cipher";
       const apiUrl = `https://api.github.com/repos/${repo}/releases/latest`;
+
+      const expectedAssets = [
+        { ext: '.zip', id: 'dl-zip', label: 'Download ZIP' },
+        { ext: '.tar.gz', id: 'dl-targz', label: 'Download TAR.GZ' }
+      ];
+
+      expectedAssets.forEach(({ id }) => {
+        const btn = document.getElementById(id);
+        if (btn) {
+          btn.classList.add('disabled');
+          btn.href = '#';
+          btn.textContent = 'Loading...';
+        }
+      });
 
       try {
         const response = await fetch(apiUrl);
         if (!response.ok) throw new Error("Failed to fetch release");
 
         const release = await response.json();
-        const version = release.tag_name;
-        const assets = release.assets;
+        const version = release.tag_name || "Unknown";
+        const assets = release.assets || [];
 
         document.getElementById("version-text").textContent = `Latest Version: ${version}`;
 
-        assets.forEach(asset => {
-          const safeName = asset.name.replace(/\W/g, "-");
-          const linkId = `dl-${safeName}`;
-          const btn = document.getElementById(linkId);
+        let foundAssets = 0;
 
-          if (btn) {
+        expectedAssets.forEach(({ ext, id, label }) => {
+          const asset = assets.find(a => a.name.toLowerCase().endsWith(ext.toLowerCase()));
+          const btn = document.getElementById(id);
+          if (btn && asset) {
             btn.href = asset.browser_download_url;
-            btn.textContent = `Download ${asset.name} (${(asset.size / 1_000_000).toFixed(1)} MB)`;
-            btn.classList.remove("disabled");
+            btn.textContent = `${label} (${(asset.size / 1_000_000).toFixed(2)} MB)`;
+            btn.classList.remove('disabled');
+            foundAssets++;
+          } else if (btn) {
+            btn.textContent = `${label} (Not available)`;
+            btn.classList.add('disabled');
+            btn.href = '#';
           }
         });
+
+        if (foundAssets === 0) {
+          document.getElementById("version-text").textContent = "No downloadable assets found for this release.";
+        }
       } catch (err) {
         console.error("Error fetching release data:", err);
-        document.getElementById("version-text").textContent = "⚠️ Unable to load release info.";
+        document.getElementById("version-text").textContent = "Unable to load release info.";
       }
     }
 
     document.addEventListener("DOMContentLoaded", updateDownloadLinks);
   </script>
+
 </body>
 </html>
