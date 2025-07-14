@@ -143,6 +143,7 @@ http://localhost:3000/
 3. User can now say "HI" to everyone!!!
 
 ### Admin
+Default:
 ```admin
 Username: admin ; Password: admin123
 ```
